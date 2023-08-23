@@ -10,11 +10,15 @@ import string
 import tempfile
 import time
 
+from opentelemetry.instrumentation.flask import FlaskInstrumentor
 
 static_folder = pathlib.Path(__file__).resolve().parent.parent / 'public'
 icons_folder = static_folder / 'icons'
 app = flask.Flask(__name__, static_folder=str(static_folder), static_url_path='')
 app.secret_key = 'tonymoris'
+
+FlaskInstrumentor().instrument_app(app)
+
 avatar_max_size = 1 * 1024 * 1024
 
 if not os.path.exists(str(icons_folder)):
