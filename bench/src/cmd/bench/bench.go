@@ -350,6 +350,7 @@ func startBenchmark(remoteAddrs []string) *BenchResult {
 	log.Println("requestInitialize()")
 	err := requestInitialize(bench.GetRandomTargetHost())
 	if err != nil {
+		log.Println(err)
 		result.Score = 0
 		result.Errors = getErrorsString()
 		result.Message = fmt.Sprint("/initialize へのリクエストに失敗しました。", err)
