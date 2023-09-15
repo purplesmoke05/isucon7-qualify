@@ -265,25 +265,34 @@ def fetch_unread():
         flask.abort(403)
 
     cur = dbh().cursor()
-    cur.execute('SELECT id FROM channel')
+    cur.execute('SELECT COUNT(*) as cnt, m.channel_id FROM message m LEFT OUTER JOIN haveread h ON (m.channel_id = h.channel_id AND m.user_id = h.user_id) AND h.message_id < m.id GROUP BY m.channel_id;')
     rows = cur.fetchall()
-    channel_ids = [row['id'] for row in rows]
-
     res = []
-    for channel_id in channel_ids:
-        cur.execute('SELECT haveread.message_id FROM haveread WHERE user_id = %s AND channel_id = %s LIMIT 1', (user_id, channel_id))
-        row = cur.fetchone()
-        if row:
-            cur.execute('SELECT COUNT(*) as cnt FROM message WHERE channel_id = %s AND %s < id LIMIT 1',
-                        (channel_id, row['message_id']))
-        else:
-            cur.execute('SELECT COUNT(*) as cnt FROM message WHERE channel_id = %s LIMIT 1', (channel_id,))
+    for row in rows:
         r = {}
-        r['channel_id'] = channel_id
-        r['unread'] = int(cur.fetchone()['cnt'])
+        r['channel_id'] = row["channel_id"]
+        r['unread'] = int(row['cnt'])
         res.append(r)
     return flask.jsonify(res)
 
+    # cur.execute('SELECT id FROM channel')
+    # rows = cur.fetchall()
+    # channel_ids = [row['id'] for row in rows]
+    #
+    # res = []
+    # for channel_id in channel_ids:
+    #     cur.execute('SELECT haveread.message_id FROM haveread WHERE user_id = %s AND channel_id = %s LIMIT 1', (user_id, channel_id))
+    #     row = cur.fetchone()
+    #     if row:
+    #         cur.execute('SELECT COUNT(*) as cnt FROM message WHERE channel_id = %s AND %s < id LIMIT 1',
+    #                     (channel_id, row['message_id']))
+    #     else:
+    #         cur.execute('SELECT COUNT(*) as cnt FROM message WHERE channel_id = %s LIMIT 1', (channel_id,))
+    #     r = {}
+    #     r['channel_id'] = channel_id
+    #     r['unread'] = int(cur.fetchone()['cnt'])
+    #     res.append(r)
+    # return flask.jsonify(res)
 
 @app.route('/history/<int:channel_id>')
 @login_required
