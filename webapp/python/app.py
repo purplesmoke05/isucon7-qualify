@@ -184,7 +184,7 @@ def get_login():
 def post_login():
     name = flask.request.form['name']
     cur = dbh().cursor()
-    cur.execute("SELECT password, salt FROM user WHERE name = %s", (name,))
+    cur.execute("SELECT id, password, salt FROM user WHERE name = %s", (name,))
     row = cur.fetchone()
     if not row or row['password'] != hashlib.sha1(
         (row['salt'] + flask.request.form['password']).encode('utf-8')
