@@ -4,6 +4,7 @@ mysqlclient
 gunicorn
 opentelemetry-api
 opentelemetry-sdk
+opentelemetry-exporter-jaeger
 opentelemetry-exporter-otlp-proto-http
 opentelemetry-instrumentation-flask
 opentelemetry-instrumentation-requests
