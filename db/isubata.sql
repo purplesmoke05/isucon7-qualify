@@ -15,7 +15,7 @@ CREATE TABLE image (
 
 CREATE TABLE image_data (
   id BIGINT UNSIGNED NOT NULL PRIMARY KEY,
-  data LONGBLOB,
+  data LONGBLOB
 ) Engine=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE channel (
@@ -32,5 +32,5 @@ CREATE TABLE message (
   user_id BIGINT,
   content TEXT,
   created_at DATETIME NOT NULL,
-  read_at DATETIME,
+  read_at DATETIME
 ) Engine=InnoDB DEFAULT CHARSET=utf8mb4;
