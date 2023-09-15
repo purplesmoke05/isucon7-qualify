@@ -280,18 +280,20 @@ def get_history(channel_id):
     if not 1 <= page <= max_page:
         flask.abort(400)
 
-    cur.execute("SELECT * FROM message INNER JOIN user ON message.user_id = user.id WHERE message.channel_id = %s ORDER BY message.id DESC LIMIT %s OFFSET %s",
+    cur.execute("SELECT message.id, message.created_at, message.content, user.name, user.display_name, user.avatar_icon as user_created_at FROM message INNER JOIN user ON message.user_id = user.id WHERE message.channel_id = %s ORDER BY message.id DESC LIMIT %s OFFSET %s",
                 (channel_id, N, (page - 1) * N))
     rows = cur.fetchall()
     messages = []
     for row in rows:
-        message = row[0]
-        user = row[1]
         r = {}
-        r['id'] = message['id']
-        r['user'] = user
-        r['date'] = message['created_at'].strftime("%Y/%m/%d %H:%M:%S")
-        r['content'] = message['content']
+        r['id'] = row['id']
+        r['user'] = {
+            "name": row['name'],
+            "display_name": row['display_name'],
+            "avatar_icon": row['avatar_icon']
+        }
+        r['date'] = row['created_at'].strftime("%Y/%m/%d %H:%M:%S")
+        r['content'] = row['content']
         messages.append(r)
     messages.reverse()
 
