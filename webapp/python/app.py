@@ -39,6 +39,7 @@ span_processor=BatchSpanProcessor(span_exporter=JaegerExporter(
     agent_port=TRACING_JAEGER_PORT,
 ))
 trace.set_tracer_provider(tracer_provider=tracer_provider)
+trace.get_tracer_provider().add_span_processor(span_processor)
 
 if not os.path.exists(str(icons_folder)):
     os.makedirs(str(icons_folder))
