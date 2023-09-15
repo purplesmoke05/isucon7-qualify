@@ -232,7 +232,7 @@ def get_message():
         r['date'] = row['created_at'].strftime("%Y/%m/%d %H:%M:%S")
         r['content'] = row['content']
         response.append(r)
-        cur.execute("UPDATE message SET read_at = NOW() WHERE id = %s, channel_id = %s, user_id = %s", (r['id'], user_id, channel_id))
+        cur.execute("UPDATE message SET read_at = NOW() WHERE id = %s AND channel_id = %s AND user_id = %s", (r['id'], user_id, channel_id))
     response.reverse()
 
     return flask.jsonify(response)
