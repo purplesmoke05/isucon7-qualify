@@ -273,10 +273,10 @@ def fetch_unread():
         cur.execute('SELECT haveread.message_id FROM haveread WHERE user_id = %s AND channel_id = %s LIMIT 1', (user_id, channel_id))
         row = cur.fetchone()
         if row:
-            cur.execute('SELECT COUNT(*) as cnt FROM message WHERE channel_id = %s AND %s < id',
+            cur.execute('SELECT COUNT(*) as cnt FROM message WHERE channel_id = %s AND %s < id LIMIT 1',
                         (channel_id, row['message_id']))
         else:
-            cur.execute('SELECT COUNT(*) as cnt FROM message WHERE channel_id = %s', (channel_id,))
+            cur.execute('SELECT COUNT(*) as cnt FROM message WHERE channel_id = %s LIMIT 1', (channel_id,))
         r = {}
         r['channel_id'] = channel_id
         r['unread'] = int(cur.fetchone()['cnt'])
@@ -296,7 +296,7 @@ def get_history(channel_id):
 
     N = 20
     cur = dbh().cursor()
-    cur.execute("SELECT COUNT(*) as cnt FROM message WHERE channel_id = %s", (channel_id,))
+    cur.execute("SELECT COUNT(*) as cnt FROM message WHERE channel_id = %s LIMIT 1", (channel_id,))
     cnt = int(cur.fetchone()['cnt'])
     max_page = math.ceil(cnt / N)
     if not max_page:
