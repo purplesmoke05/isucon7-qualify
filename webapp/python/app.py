@@ -84,7 +84,6 @@ def get_initialize():
     cur.execute("DELETE FROM image WHERE id > 1001")
     cur.execute("DELETE FROM channel WHERE id > 10")
     cur.execute("DELETE FROM message WHERE id > 10000")
-    cur.execute("DELETE FROM haveread")
     cur.close()
     return ('', 204)
 
@@ -234,13 +233,8 @@ def get_message():
         r['date'] = row['created_at'].strftime("%Y/%m/%d %H:%M:%S")
         r['content'] = row['content']
         response.append(r)
+        cur.execute("UPDATE message SET read_at = NOW() WHERE id = %s, channel_id = %s, user_id = %s", (r['id'], user_id, channel_id))
     response.reverse()
-
-    max_message_id = max(r['id'] for r in rows) if rows else 0
-    cur.execute('INSERT INTO haveread (user_id, channel_id, message_id, updated_at, created_at)'
-                ' VALUES (%s, %s, %s, NOW(), NOW())'
-                ' ON DUPLICATE KEY UPDATE message_id = %s, updated_at = NOW()',
-                (user_id, channel_id, max_message_id, max_message_id))
 
     return flask.jsonify(response)
 
@@ -251,8 +245,6 @@ def fetch_unread():
     if not user_id:
         flask.abort(403)
 
-    time.sleep(1.0)
-
     cur = dbh().cursor()
     cur.execute('SELECT id FROM channel')
     rows = cur.fetchall()
@@ -260,13 +252,7 @@ def fetch_unread():
 
     res = []
     for channel_id in channel_ids:
-        cur.execute('SELECT * FROM haveread WHERE user_id = %s AND channel_id = %s', (user_id, channel_id))
-        row = cur.fetchone()
-        if row:
-            cur.execute('SELECT COUNT(*) as cnt FROM message WHERE channel_id = %s AND %s < id',
-                        (channel_id, row['message_id']))
-        else:
-            cur.execute('SELECT COUNT(*) as cnt FROM message WHERE channel_id = %s', (channel_id,))
+        cur.execute('SELECT COUNT(*) as cnt FROM message WHERE read_at IS NOT NULL AND user_id = %s', (user_id,))
         r = {}
         r['channel_id'] = channel_id
         r['unread'] = int(cur.fetchone()['cnt'])
