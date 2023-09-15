@@ -34,3 +34,12 @@ CREATE TABLE message (
   created_at DATETIME NOT NULL,
   read_at DATETIME
 ) Engine=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE haveread (
+  user_id BIGINT NOT NULL,
+  channel_id BIGINT NOT NULL,
+  message_id BIGINT,
+  updated_at DATETIME NOT NULL,
+  created_at DATETIME NOT NULL,
+  PRIMARY KEY(user_id, channel_id)
+) Engine=InnoDB DEFAULT CHARSET=utf8mb4;
