@@ -10,16 +10,35 @@ import string
 import tempfile
 import time
 
-from opentelemetry.instrumentation.flask import FlaskInstrumentor
-
 static_folder = pathlib.Path(__file__).resolve().parent.parent / 'public'
 icons_folder = static_folder / 'icons'
 app = flask.Flask(__name__, static_folder=str(static_folder), static_url_path='')
 app.secret_key = 'tonymoris'
+avatar_max_size = 1 * 1024 * 1024
+
+from opentelemetry import trace
+from opentelemetry.instrumentation.flask import FlaskInstrumentor
+from opentelemetry.exporter.jaeger.thrift import JaegerExporter
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import BatchSpanProcessor
+from opentelemetry.sdk.resources import Resource, SERVICE_NAME
+from opentelemetry.instrumentation.mysqlclient import MySQLClientInstrumentor
 
 FlaskInstrumentor().instrument_app(app)
+MySQLClientInstrumentor().instrument()
+TRACING_JAEGER_HOST_NAME = os.environ.get("TRACING_JAEGER_HOST_NAME")
+TRACING_JAEGER_PORT = int(os.environ.get("TRACING_JAEGER_PORT")) if os.environ.get("TRACING_JAEGER_PORT") else 6831
 
-avatar_max_size = 1 * 1024 * 1024
+tracer_provider = TracerProvider(
+    resource=Resource.create({
+        SERVICE_NAME: "isucon7"
+    })
+)
+span_processor=BatchSpanProcessor(span_exporter=JaegerExporter(
+    agent_host_name=TRACING_JAEGER_HOST_NAME,
+    agent_port=TRACING_JAEGER_PORT,
+))
+trace.set_tracer_provider(tracer_provider=tracer_provider)
 
 if not os.path.exists(str(icons_folder)):
     os.makedirs(str(icons_folder))
