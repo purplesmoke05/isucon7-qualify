@@ -251,7 +251,7 @@ def fetch_unread():
 
     res = []
     for channel_id in channel_ids:
-        cur.execute('SELECT COUNT(*) as cnt FROM message WHERE read_at IS NOT NULL AND user_id = %s', (user_id,))
+        cur.execute('SELECT COUNT(*) as cnt FROM message WHERE read_at IS NULL AND user_id = %s', (user_id,))
         r = {}
         r['channel_id'] = channel_id
         r['unread'] = int(cur.fetchone()['cnt'])
