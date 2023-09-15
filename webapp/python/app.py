@@ -139,7 +139,7 @@ def get_index():
 
 def get_channel_list_info(focus_channel_id=None):
     cur = dbh().cursor()
-    cur.execute("SELECT * FROM channel ORDER BY id")
+    cur.execute("SELECT channel.id, channel.name, channel.description FROM channel ORDER BY id")
     channels = cur.fetchall()
     description = ""
 
@@ -184,10 +184,11 @@ def get_login():
 def post_login():
     name = flask.request.form['name']
     cur = dbh().cursor()
-    cur.execute("SELECT * FROM user WHERE name = %s", (name,))
+    cur.execute("SELECT password, salt FROM user WHERE name = %s", (name,))
     row = cur.fetchone()
     if not row or row['password'] != hashlib.sha1(
-            (row['salt'] + flask.request.form['password']).encode('utf-8')).hexdigest():
+        (row['salt'] + flask.request.form['password']).encode('utf-8')
+    ).hexdigest():
         flask.abort(403)
     flask.session['user_id'] = row['id']
     return flask.redirect('/', 303)
@@ -220,8 +221,10 @@ def get_message():
     channel_id = int(flask.request.args.get('channel_id'))
     last_message_id = int(flask.request.args.get('last_message_id'))
     cur = dbh().cursor()
-    cur.execute("SELECT message.id, message.created_at, message.content, message.user_id FROM message WHERE id > %s AND channel_id = %s ORDER BY id DESC LIMIT 100",
-                (last_message_id, channel_id))
+    cur.execute(
+        "SELECT message.id, message.created_at, message.content, message.user_id FROM message WHERE id > %s AND channel_id = %s ORDER BY id DESC LIMIT 100",
+        (last_message_id, channel_id)
+    )
     rows = cur.fetchall()
     response = []
     user_dict = {}
@@ -365,9 +368,9 @@ def post_profile():
         flask.abort(403)
 
     cur = dbh().cursor()
-    user = db_get_user(cur, user_id)
-    if not user:
-        flask.abort(403)
+    # user = db_get_user(cur, user_id)
+    # if not user:
+    #     flask.abort(403)
 
     display_name = flask.request.form.get('display_name')
     avatar_name = None
