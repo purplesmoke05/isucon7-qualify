@@ -378,7 +378,7 @@ def post_profile():
                 avatar_data = data
 
     if avatar_name and avatar_data:
-        cur.execute("INSERT INTO image (name) VALUES (%s)", (avatar_name))
+        cur.execute("INSERT INTO image (name) VALUES (%s)", (avatar_name,))
         cur.execute("INSERT INTO image_data (id, data) VALUES (%s, _binary %s)", (cur.lastrowid, avatar_data))
         cur.execute("UPDATE user SET avatar_icon = %s WHERE id = %s", (avatar_name, user_id))
 
