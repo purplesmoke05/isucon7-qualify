@@ -390,7 +390,8 @@ def post_profile():
                 avatar_data = data
 
     if avatar_name and avatar_data:
-        cur.execute("INSERT INTO image (name, data) VALUES (%s, _binary %s)", (avatar_name, avatar_data))
+        cur.execute("INSERT INTO image (name) VALUES (%s)", (avatar_name))
+        cur.execute("INSERT INTO image_data (id, data) VALUES (%s, _binary %s)", (cur.lastrowid, avatar_data))
         cur.execute("UPDATE user SET avatar_icon = %s WHERE id = %s", (avatar_name, user_id))
 
     if display_name:
@@ -416,8 +417,11 @@ def get_icon(file_name):
     row = cur.fetchone()
     ext = os.path.splitext(file_name)[1] if '.' in file_name else ''
     mime = ext2mime(ext)
-    if row and mime:
-        return flask.Response(row['data'], mimetype=mime)
+    if row:
+        cur.execute("SELECT * FROM image_data WHERE id = %s", (row["id"],))
+        image_data_row = cur.fetchone()
+        if image_data_row:
+            return flask.Response(image_data_row['data'], mimetype=mime)
     flask.abort(404)
 
 
