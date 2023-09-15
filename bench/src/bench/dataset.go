@@ -273,7 +273,8 @@ func GenerateInitialDataSetSQL(outputPath string) {
 	}
 
 	// default image
-	fbadf(w, "INSERT INTO image (id, name, data) VALUES (%s, %s, %s);", "1", "default.png", DataSet.DefaultAvatar.Bytes)
+	fbadf(w, "INSERT INTO image (id, name) VALUES (%s, %s);", "1", "default.png")
+	fbadf(w, "INSERT INTO image_data (id, data) VALUES (%s, %s);", "1", DataSet.DefaultAvatar.Bytes)
 
 	// image
 	for i, user := range DataSet.Users {
@@ -281,7 +282,8 @@ func GenerateInitialDataSetSQL(outputPath string) {
 			avatar_name := user.Avatar.SHA1 + filepath.Ext(user.Avatar.FilePath)
 			avatar_data := user.Avatar.Bytes
 			must(err)
-			fbadf(w, "INSERT INTO image (id, name, data) VALUES (%s, %s, %s);", i+2, avatar_name, avatar_data)
+			fbadf(w, "INSERT INTO image (id, name) VALUES (%s, %s);", i+2, avatar_name)
+			fbadf(w, "INSERT INTO image_data (id, data) VALUES (%s, %s);", i+2, avatar_data)
 		}
 	}
 

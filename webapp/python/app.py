@@ -125,8 +125,7 @@ def register(cur, user, password):
             "INSERT INTO user (name, salt, password, display_name, avatar_icon, created_at)"
             " VALUES (%s, %s, %s, %s, %s, NOW())",
             (user, salt, pass_digest, user, "default.png"))
-        cur.execute("SELECT LAST_INSERT_ID() AS last_insert_id")
-        return cur.fetchone()['last_insert_id']
+        return cur.lastrowid
     except MySQLdb.IntegrityError:
         flask.abort(409)
 
